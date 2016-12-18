@@ -33,7 +33,6 @@
 
 #define BOOST_LOG_DONOT_USE_WCHAR_T
 
-//#include <boost/algorithm/string.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/log/trivial.hpp>
@@ -52,16 +51,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
-// #include <boost/program_options.hpp>
-//#include <boost/property_tree/ptree.hpp>
-//#include <boost/property_tree/json_parser.hpp>
-//#include <boost/scope_exit.hpp>
-//#include <boost/spirit/include/qi.hpp>
-//#include <boost/spirit/home/qi/string.hpp>
 #include <boost/thread.hpp>
 
-//namespace qi = boost::spirit::qi;
-//namespace po = boost::program_options;
 namespace logging = boost::log;
 namespace src = boost::log::sources;
 namespace expr = boost::log::expressions;

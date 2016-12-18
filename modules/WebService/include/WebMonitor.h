@@ -30,7 +30,6 @@ public:
 	WebMonitor(const std::string& url
 		, ConversionType type
 		, const std::string& outputFile);
-	//! Constructor.
 	//! Destructor.
 	~WebMonitor();
 

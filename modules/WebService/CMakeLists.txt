@@ -65,8 +65,6 @@ add_precompiled_headers(WebService "src/")
 set_target_properties(WebService PROPERTIES OUTPUT_NAME "WebService")
 
 target_link_libraries(WebService
-	Ws2_32.lib
-	Wldap32.lib
 	${Boost_LIBRARIES}
 	${libcurl_LIBRARIES})
 
