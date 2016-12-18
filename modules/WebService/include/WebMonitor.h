@@ -27,7 +27,9 @@ public:
 	//
 public:
 	//! Constructor.
-	WebMonitor(const std::string& url, ConversionType type);
+	WebMonitor(const std::string& url
+		, ConversionType type
+		, const std::string& outputFile);
 	//! Constructor.
 	//! Destructor.
 	~WebMonitor();
@@ -83,6 +85,8 @@ private:
 	std::unique_ptr<CURL, std::function<void(CURL*)>> curlPtr_;
 	//! Download url.
 	std::string url_;
+	//! Output file.
+	std::string outputFile_;
 	//! Conversion type.
 	ConversionType type_;
 };

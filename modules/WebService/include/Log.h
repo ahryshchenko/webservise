@@ -1,7 +1,7 @@
 #pragma once
 
 #define LOGFILE "logfile.log"
-#define SEVERITY_THRESHOLD logging::trivial::warning
+#define SEVERITY_THRESHOLD logging::trivial::trace
 // register a global logger
 BOOST_LOG_GLOBAL_LOGGER(logger, boost::log::sources::severity_logger_mt<boost::log::trivial::severity_level>)
 #define LOG(severity) BOOST_LOG_SEV(logger::get(),boost::log::trivial::severity)
