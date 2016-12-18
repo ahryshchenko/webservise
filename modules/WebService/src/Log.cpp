@@ -10,7 +10,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(logger, src::severity_logger_mt)
 	logger.add_attribute("TimeStamp", attrs::local_clock());
 	typedef sinks::synchronous_sink<sinks::text_ostream_backend> text_sink;
 	boost::shared_ptr<text_sink> sink = boost::make_shared<text_sink>();
-	sink->locked_backend()->add_stream(boost::make_shared<std::ofstream>(LOGFILE));
+	sink->locked_backend()->add_stream(boost::make_shared<std::ofstream>(LOGFILE, std::ios::out | std::ios::app));
 	sink->locked_backend()->add_stream(boost::shared_ptr<std::ostream>(&std::clog, boost::null_deleter()));
 	logging::formatter formatter = expr::stream
 		<< expr::format_date_time(timestamp, "%Y-%m-%d, %H:%M:%S") << " "

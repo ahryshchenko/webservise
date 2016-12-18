@@ -6,13 +6,18 @@ int main(int argc, char* argv[])
 {
 	try
 	{
-		if (argc < 3)
+		if (argc < 4)
 		{
 			LERR_ << "Wrong number of arguments. Closing.";
 			return 0;
 		}
 
-		std::string typeStr{ argv[1] };
+		LAPP_ << "Input parameters:"
+			<< " URL - " << argv[1]
+			<< ", Type - " << argv[2]
+			<< ", Output file name - " << argv[3];
+
+		std::string typeStr{ argv[2] };
 		WebMonitor::ConversionType type;
 		if (!typeStr.compare("XML_JSON"))
 			type = WebMonitor::ConversionType::XML_JSON;
@@ -21,8 +26,9 @@ int main(int argc, char* argv[])
 
 		std::unique_ptr<WebMonitor> monitor
 			= std::make_unique<WebMonitor>(
-				argv[2]
-				, type);
+				argv[1]
+				, type
+				, argv[3]);
 
 		if (!monitor)
 			BOOST_THROW_EXCEPTION(
@@ -35,7 +41,7 @@ int main(int argc, char* argv[])
 		monitor->Run();
 		while (monitor->IsRunning())
 		{
-			LAPP_ << "WebMonitor is running";
+			//LAPP_ << "WebMonitor is running";
 
 			auto end = std::chrono::system_clock::now();
 			std::chrono::duration<double> diff = end - start;

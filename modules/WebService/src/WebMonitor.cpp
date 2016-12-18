@@ -9,9 +9,13 @@
 #include "WebMonitor.h"
 #include "xml2json.hpp"
 
-WebMonitor::WebMonitor(const std::string& url, ConversionType type)
+WebMonitor::WebMonitor(
+	const std::string& url
+	, ConversionType type
+	, const std::string& outputFile)
 	: isRunning_(false)
 	, url_(url)
+	, outputFile_(outputFile)
 	, type_(type)
 	, curlPtr_(
 		InitCurl(),
@@ -52,7 +56,7 @@ void WebMonitor::DoConversion(const std::string& content)
 	case WebMonitor::ConversionType::XML_YAML:
 		break;
 	default:
-		LERR_ << "Wrong conversion type";
+		LERR_ << "Wrong conversion type.";
 		break;
 	}
 }
@@ -169,16 +173,17 @@ void WebMonitor::JSONtoXMLConversion(const std::string& content)
 			return;
 		}
 
-		io::stream_buffer<io::file_sink> buf("output.xml");
+		io::stream_buffer<io::file_sink> buf(
+			outputFile_.empty() ? "output.xml" : outputFile_);
 		std::ostream out(&buf);
 		out << object->xml(jsonxx::JXML);
+
+		LAPP_ << "JSON to XML conversion succeeded.";
 	}
 	catch (const std::exception& e)
 	{
 		LERR_ << e.what();
 	}
-
-	LAPP_ << "JSON to XML conversion succeeded";
 }
 
 void WebMonitor::Run()
@@ -206,7 +211,7 @@ void WebMonitor::XMLtoJSONConversion(const std::string& content)
 {
 	if (content.empty())
 	{
-		LERR_ << "Empty conversion content";
+		LERR_ << "Empty conversion content.";
 		return;
 	}
 
@@ -218,14 +223,15 @@ void WebMonitor::XMLtoJSONConversion(const std::string& content)
 			BOOST_THROW_EXCEPTION(
 				std::runtime_error("Error during XML content convertion."));
 
-		io::stream_buffer<io::file_sink> buf("output.json");
+		io::stream_buffer<io::file_sink> buf(
+			outputFile_.empty() ? "output.json" : outputFile_);
 		std::ostream out(&buf);
 		out << jsonStr;
+
+		LAPP_ << "XML to JSON conversion succeeded.";
 	}
 	catch (const std::exception& e)
 	{
 		LERR_ << e.what();
 	}
-
-	LAPP_ << "XML to JSON conversion succeeded";
 }
