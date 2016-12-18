@@ -70,8 +70,9 @@ SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 set(libcurl_INCLUDE_DIRS
 	${EXTERNAL_PATH}/libcurl/include/)
 set(libcurl_LIBRARIES
-	debug ${EXTERNAL_PATH}/libcurl/lib/libcurl_d.lib
-	optimized ${EXTERNAL_PATH}/libcurl/lib/libcurl.lib)
+	debug ${EXTERNAL_PATH}/libcurl/lib/libcurld.lib
+	optimized ${EXTERNAL_PATH}/libcurl/lib/libcurl.lib
+)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 

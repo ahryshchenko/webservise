@@ -12,20 +12,22 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME ${BUILD_WITH_STATIC_CRT})
 
-#find_package(Boost REQUIRED COMPONENTS filesystem system serialization date_time thread chrono program_options)
-#include_directories(${Boost_INCLUDE_DIRS})
+find_package(Boost REQUIRED COMPONENTS filesystem system serialization date_time thread chrono program_options log)
+include_directories(${Boost_INCLUDE_DIRS})
 
 #
 # Source files.
 #
 
 set(HEADER_FILES
-	#include/WebMonitor.h
+	include/Log.h
+	include/WebMonitor.h
 	)
 
 set(SOURCE_FILES
-	#src/WebMonitor.cpp
+	src/Log.cpp
 	src/main.cpp
+	src/WebMonitor.cpp
 	)
 
 set(MISC
@@ -59,7 +61,9 @@ add_precompiled_headers(WebService "src/")
 set_target_properties(WebService PROPERTIES OUTPUT_NAME "WebService")
 
 target_link_libraries(WebService
-	#${Boost_LIBRARIES}
+	Ws2_32.lib
+	Wldap32.lib
+	${Boost_LIBRARIES}
 	${libcurl_LIBRARIES})
 
 install(TARGETS WebService

