@@ -22,12 +22,14 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(HEADER_FILES
 	include/Log.h
 	include/WebMonitor.h
+	${JSONXX_PARSER_ROOT}/jsonxx.h
 	)
 
 set(SOURCE_FILES
 	src/Log.cpp
 	src/main.cpp
 	src/WebMonitor.cpp
+	${JSONXX_PARSER_ROOT}/jsonxx.cc
 	)
 
 set(MISC
@@ -43,7 +45,9 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 include_directories(
 	include
 	${CMAKE_CURRENT_BINARY_DIR}
-	${libcurl_INCLUDE_DIRS})
+	${libcurl_INCLUDE_DIRS}
+	${XML2JSON_INCLUDE_DIRS}
+	${JSONXX_PARSER_ROOT})
 
 add_definitions(
 	-D_SCL_SECURE_NO_WARNINGS

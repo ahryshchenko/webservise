@@ -3,12 +3,16 @@
 //
 
 #include "pch.h"
+
+#include "jsonxx.h"
 #include "Log.h"
 #include "WebMonitor.h"
+#include "xml2json.hpp"
 
-WebMonitor::WebMonitor(const std::string& url)
+WebMonitor::WebMonitor(const std::string& url, ConversionType type)
 	: isRunning_(false)
 	, url_(url)
+	, type_(type)
 	, curlPtr_(
 		InitCurl(),
 		std::bind(&WebMonitor::CurlDeleter, this, std::placeholders::_1))
@@ -31,6 +35,26 @@ void WebMonitor::CurlDeleter(CURL* curlPtr)
 {
 	curl_easy_cleanup(curlPtr);
 	curl_global_cleanup();
+}
+
+void WebMonitor::DoConversion(const std::string& content)
+{
+	switch (type_)
+	{
+	case WebMonitor::ConversionType::XML_JSON:
+		XMLtoJSONConversion(content);
+		break;
+	case WebMonitor::ConversionType::JSON_XML:
+		JSONtoXMLConversion(content);
+		break;
+	case WebMonitor::ConversionType::YAML_XML:
+		break;
+	case WebMonitor::ConversionType::XML_YAML:
+		break;
+	default:
+		LERR_ << "Wrong conversion type";
+		break;
+	}
 }
 
 void WebMonitor::DoRun()
@@ -79,51 +103,17 @@ bool WebMonitor::Download(const std::string& url)
 		curl_easy_perform(curlPtr_.get());
 		curl_easy_getinfo(curlPtr_.get(), CURLINFO_RESPONSE_CODE, &httpCode);
 
-		if (httpCode == 200)
+		//TODO: For HTTP responses CURLINFO_RESPONSE_CODE should be 200.
+		// As for local file we don't receive any response just check Data size.
+		if (/*httpCode == 200*/ true)
 		{
 			if (httpData.empty())
 			{
 				LERR_ << "Server response is empty.";
 				return false;
 			}
-			/*
-			std::stringstream dataStream;
-			dataStream << httpData;
-			boost::property_tree::ptree pt;
-			boost::property_tree::read_json(dataStream, pt);
 
-			auto& data = pt.get_child("data");
-			bool isPopup = data.get<bool>("popup");
-			if (!isPopup)
-				return false;
-
-			std::vector<std::string> urls;
-			for (auto& e : data.get_child("urls"))
-				urls.push_back(e.second.get_value<std::string>());
-
-			bool state{ false };
-			for (const auto& childUrl : urls)
-			{
-				curl_easy_setopt(curlPtr_.get(), CURLOPT_URL, childUrl.c_str());
-				CURLcode result = curl_easy_perform(curlPtr_.get());
-
-				if (result == CURLE_OK)
-				{
-					state = true;
-					std::wstring wideUrl{ childUrl.begin(), childUrl.end() };
-					url_ = wideUrl;
-					::PostMessage(parent_, defs::WM_SHOW_POPUP, 0, 0);
-					break;
-				}
-				
-			}
-
-			if (!state)
-			{
-				LDBG_ << "There isn't any valid URL.";
-				return false;
-			}
-			*/
+			DoConversion(httpData);
 		}
 		else
 		{
@@ -151,6 +141,46 @@ CURL* WebMonitor::InitCurl()
 	return curl_easy_init();
 }
 
+bool WebMonitor::IsRunning()
+{
+	return isRunning_;
+}
+
+void WebMonitor::JSONtoXMLConversion(const std::string& content)
+{
+	if (content.empty())
+	{
+		LERR_ << "Empty conversion content";
+		return;
+	}
+
+	try
+	{
+		std::unique_ptr<jsonxx::Object> object
+			= std::make_unique<jsonxx::Object>();
+
+		if (!object)
+			BOOST_THROW_EXCEPTION(
+				std::runtime_error("Error during JSON parser creation."));
+		
+		if (!object->parse(content))
+		{
+			LERR_ << "Error during JSON parsing.";
+			return;
+		}
+
+		io::stream_buffer<io::file_sink> buf("output.xml");
+		std::ostream out(&buf);
+		out << object->xml(jsonxx::JXML);
+	}
+	catch (const std::exception& e)
+	{
+		LERR_ << e.what();
+	}
+
+	LAPP_ << "JSON to XML conversion succeeded";
+}
+
 void WebMonitor::Run()
 {
 	if (isRunning_)
@@ -170,4 +200,32 @@ void WebMonitor::Stop()
 		thread_->interrupt();
 		thread_->join();
 	}
+}
+
+void WebMonitor::XMLtoJSONConversion(const std::string& content)
+{
+	if (content.empty())
+	{
+		LERR_ << "Empty conversion content";
+		return;
+	}
+
+	try
+	{
+		std::string jsonStr(xml2json(content.c_str()));
+
+		if (jsonStr.empty())
+			BOOST_THROW_EXCEPTION(
+				std::runtime_error("Error during XML content convertion."));
+
+		io::stream_buffer<io::file_sink> buf("output.json");
+		std::ostream out(&buf);
+		out << jsonStr;
+	}
+	catch (const std::exception& e)
+	{
+		LERR_ << e.what();
+	}
+
+	LAPP_ << "XML to JSON conversion succeeded";
 }

@@ -10,11 +10,24 @@
 class WebMonitor
 {
 	//
+	// Public types.
+	//
+public:
+	//! Convert type.
+	enum class ConversionType
+	{
+		XML_JSON = 0,
+		JSON_XML,
+		YAML_XML,
+		XML_YAML
+	};
+
+	//
 	// Construction and destruction.
 	//
 public:
 	//! Constructor.
-	WebMonitor(const std::string& url);
+	WebMonitor(const std::string& url, ConversionType type);
 	//! Constructor.
 	//! Destructor.
 	~WebMonitor();
@@ -23,6 +36,8 @@ public:
 	// Public interface.
 	//
 public:
+	//! Returns true if monitor is running.
+	bool IsRunning();
 	//! Starts monitor.
 	void Run();
 	//! Stops monitor.
@@ -43,12 +58,18 @@ private:
 private:
 	//! Deleter for CURL member.
 	void CurlDeleter(CURL* curlPtr);
+	//! Does the conversion work.
+	void DoConversion(const std::string& content);
 	//! Does the real work.
 	void DoRun();
 	//! Downloads file.
 	bool Download(const std::string& url);
 	//! Initializes CURL object.
 	CURL* InitCurl();
+	//! JSON to XML conversion.
+	void JSONtoXMLConversion(const std::string& content);
+	//! XML to JSON conversion.
+	void XMLtoJSONConversion(const std::string& content);
 
 	//
 	// Private data members.
@@ -62,6 +83,8 @@ private:
 	std::unique_ptr<CURL, std::function<void(CURL*)>> curlPtr_;
 	//! Download url.
 	std::string url_;
+	//! Conversion type.
+	ConversionType type_;
 };
 
 #endif // WEBMONITOR_H_

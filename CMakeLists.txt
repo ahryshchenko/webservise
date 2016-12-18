@@ -74,6 +74,14 @@ set(libcurl_LIBRARIES
 	optimized ${EXTERNAL_PATH}/libcurl/lib/libcurl.lib
 )
 
+# Add xml2json library to the project.
+set(XML2JSON_INCLUDE_DIRS
+	${EXTERNAL_PATH}/xml2json)
+	
+# JSONXX parser directory.
+set(JSONXX_PARSER_ROOT
+	${EXTERNAL_PATH}/jsonxx)
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 # Set favor small code optimization
