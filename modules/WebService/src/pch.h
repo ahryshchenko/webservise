@@ -3,15 +3,11 @@
 #include "targetver.h"
 
 //////////////////////////////////////////////////////////////////////////
-// Platform specific includes and definitions.
-//
-
-#include <atomic>
-
-//////////////////////////////////////////////////////////////////////////
 // STL includes and definitions.
 //
 
+#include <atomic>
+#include <chrono>
 #include <string>
 
 //////////////////////////////////////////////////////////////////////////
@@ -54,6 +50,8 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/stream.hpp>
 // #include <boost/program_options.hpp>
 //#include <boost/property_tree/ptree.hpp>
 //#include <boost/property_tree/json_parser.hpp>
@@ -69,6 +67,7 @@ namespace src = boost::log::sources;
 namespace expr = boost::log::expressions;
 namespace sinks = boost::log::sinks;
 namespace attrs = boost::log::attributes;
+namespace io = boost::iostreams;
 
 #pragma warning(pop)
 
