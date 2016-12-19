@@ -6,7 +6,7 @@ Steps to generate project:
 https://sourceforge.net/projects/boost/files/boost-binaries/
 4. Set environment variable $ENV{BOOST_ROOT}
 5. Run script:
-cmakegen-vc14-x64.cmd
+cmakegen-vc14-x86.cmd
 6. Build WebService and WebService-test projects.
 7. Find binaries into build\vc14-x86\bin\
 
